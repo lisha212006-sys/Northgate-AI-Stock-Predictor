@@ -4,10 +4,17 @@ import pandas as pd
 import streamlit as st
 from PIL import Image
 
-# Fix sys.path so Python can find 'src' from within subdirectories
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+# Fix sys.path to find modules in parent directory
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+# Import global dark theme module
+from theme import apply_dark_theme
+
+# Page Setup
 st.set_page_config(page_title="Portfolio Optimization", page_icon="⚖️", layout="wide")
+
+# Apply Global Dark Mode Styling
+apply_dark_theme()
 
 REPORTS_DIR = "reports"
 FIGURES_DIR = os.path.join(REPORTS_DIR, "figures")
@@ -21,7 +28,7 @@ def load_report_csv(file_name):
     return None
 
 
-st.title("⚖️ Section 11: Modern Portfolio Theory (MPT)")
+st.title("⚖️ Modern Portfolio Theory (MPT)")
 st.markdown("Optimization using SLSQP Max-Sharpe allocation, Monte Carlo cross-validation, and baseline backtesting.")
 
 col1, col2 = st.columns([1, 1.2])
@@ -45,6 +52,6 @@ with col2:
     
     if os.path.exists(ef_img_path):
         image = Image.open(ef_img_path)
-        st.image(image, caption="Efficient Frontier & Simulated Portfolios", use_column_width=True)
+        st.image(image, caption="Efficient Frontier & Simulated Portfolios", use_container_width=True)
     else:
         st.info("Efficient Frontier image not found in `reports/figures/`.")

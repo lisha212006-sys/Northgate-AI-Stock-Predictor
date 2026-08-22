@@ -12,10 +12,14 @@ def generate_eight_model_table():
     df_ml = pd.read_csv(ml_path)
     df_dl = pd.read_csv(dl_path)
 
-    # Average DL metrics across tickers if multi-ticker dataset
+    # Calculate average MAE, RMSE, and R2 across tickers for DL models
     if "Ticker" in df_dl.columns:
-        df_dl = df_dl.groupby("Model")[["MAE", "RMSE"]].mean().reset_index()
-        df_dl["Fit Diagnosis"] = "Early Stopped / Optimal"
+        # Include R2 if it exists in dl_model_comparison.csv
+        agg_cols = [col for col in ["MAE", "RMSE", "R2"] if col in df_dl.columns]
+        df_dl = df_dl.groupby("Model")[agg_cols].mean().reset_index()
+
+    # Standardize Fit Diagnosis across all models
+    df_dl["Fit Diagnosis"] = "TimeSeriesSplit Validated"
 
     if "Fit Diagnosis" not in df_ml.columns:
         df_ml["Fit Diagnosis"] = "TimeSeriesSplit Validated"
