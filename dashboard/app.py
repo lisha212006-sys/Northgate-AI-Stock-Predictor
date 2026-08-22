@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 from PIL import Image
 import base64
-from theme import apply_dark_theme  #
+from theme import apply_dark_theme
 
 # --- Streamlit Page Setup ---
 st.set_page_config(
@@ -14,16 +14,16 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 apply_dark_theme()
+
 # --- File Paths ---
 REPORTS_DIR = "reports"
 FIGURES_DIR = os.path.join(REPORTS_DIR, "figures")
-
-
+PROCESSED_DIR = os.path.join("data", "processed")
 
 # --- Cached Data Loading Functions ---
 @st.cache_data
-def load_csv_data(file_name):
-    path = os.path.join(REPORTS_DIR, file_name)
+def load_csv_data(file_name, subfolder=REPORTS_DIR):
+    path = os.path.join(subfolder, file_name)
     if os.path.exists(path):
         return pd.read_csv(path)
     return None
@@ -32,6 +32,7 @@ def load_csv_data(file_name):
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Select View:", [
     "Overview & Recommendations",
+    "FinBERT Sentiment Analysis",
     "Model Evaluation (ML vs DL)",
     "Portfolio Optimization & Backtest"
 ])
@@ -88,7 +89,34 @@ if page == "Overview & Recommendations":
         st.dataframe(rebalance_df, use_container_width=True)
 
 # ==========================================
-# PAGE 2: MODEL EVALUATION & LOSS CURVES
+# PAGE 2: FINBERT SENTIMENT ANALYSIS
+# ==========================================
+elif page == "FinBERT Sentiment Analysis":
+    st.title("📰 FinBERT Financial News & Sentiment Analysis")
+    st.markdown("Real-time alternative data sentiment scores generated via HuggingFace's **ProsusAI/finbert** model.")
+
+    sentiment_df = load_csv_data("sentiment_features.csv", subfolder=PROCESSED_DIR)
+
+    if sentiment_df is not None:
+        col1, col2 = st.columns([1, 2])
+        
+        with col1:
+            st.subheader("Ticker Sentiment Summary")
+            ticker_avg = sentiment_df.groupby("Ticker")["Sentiment_Score"].mean().reset_index()
+            st.dataframe(ticker_avg, use_container_width=True)
+
+        with col2:
+            st.subheader("Net Polarity Scores")
+            st.bar_chart(data=ticker_avg, x="Ticker", y="Sentiment_Score")
+
+        st.markdown("---")
+        st.subheader("Detailed Sentiment Feature Matrix")
+        st.dataframe(sentiment_df, use_container_width=True)
+    else:
+        st.warning("`sentiment_features.csv` not found in `data/processed/`. Run notebook `02_sentiment_analysis_finbert.ipynb` first.")
+
+# ==========================================
+# PAGE 3: MODEL EVALUATION & LOSS CURVES
 # ==========================================
 elif page == "Model Evaluation (ML vs DL)":
     st.title("📊 Model Comparison & Loss Curves")
@@ -124,7 +152,7 @@ elif page == "Model Evaluation (ML vs DL)":
             st.info("No loss curves found in `reports/figures/`.")
 
 # ==========================================
-# PAGE 3: PORTFOLIO OPTIMIZATION & BACKTEST
+# PAGE 4: PORTFOLIO OPTIMIZATION & BACKTEST
 # ==========================================
 elif page == "Portfolio Optimization & Backtest":
     st.title("⚖️ Modern Portfolio Theory (MPT)")
