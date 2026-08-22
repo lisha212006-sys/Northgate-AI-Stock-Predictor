@@ -1,13 +1,13 @@
-Ticker,Expected Return (%),Recommendation Signal,Target Weight (%),Transparent Rationale
-AAPL,2.5,BUY,11.86,Forecasted Return: +2.50%. Signal [BUY] driven by return relative to thresholds. Target allocation adjusted to 11.9% via Max-Sharpe MPT.
-CAT,0.0,HOLD,11.14,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 11.1% via Max-Sharpe MPT.
-HD,0.0,HOLD,2.15,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 2.1% via Max-Sharpe MPT.
-JNJ,0.0,HOLD,15.67,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 15.7% via Max-Sharpe MPT.
-JPM,0.0,HOLD,12.58,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 12.6% via Max-Sharpe MPT.
-KO,0.0,HOLD,3.94,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 3.9% via Max-Sharpe MPT.
-MSFT,0.5,HOLD,10.05,Forecasted Return: +0.50%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 10.1% via Max-Sharpe MPT.
-NVDA,0.0,HOLD,20.65,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 20.6% via Max-Sharpe MPT.
-PG,0.0,HOLD,0.0,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 0.0% via Max-Sharpe MPT.
-XOM,0.0,HOLD,0.0,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 0.0% via Max-Sharpe MPT.
-^GSPC,0.0,HOLD,0.0,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 0.0% via Max-Sharpe MPT.
-^VIX,0.0,HOLD,11.96,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 12.0% via Max-Sharpe MPT.
+Ticker,Max-Sharpe Weight (SLSQP),Monte-Carlo Weight,Expected Return (%),Sentiment_Score,Recommendation Signal
+AAPL,0.118627694049618,0.1718870396614333,0.56,-0.13,SELL
+CAT,0.1113778642423543,0.0826645187631957,0.62,-0.12,SELL
+HD,0.0214716477106077,0.0143083574341031,2.22,0.33,HOLD
+JNJ,0.1567333223019483,0.1242312994973728,3.65,0.25,HOLD
+JPM,0.1257971998582295,0.0321867263028332,0.16,0.46,HOLD
+KO,0.0393555824975572,0.1648945456308528,3.58,0.4,HOLD
+MSFT,0.1005222179096769,0.08680769382645,0.94,0.3,HOLD
+NVDA,0.2064765166510442,0.1704100617877819,0.43,0.38,HOLD
+PG,0.0,0.0109409858119688,3.35,-0.17,SELL
+XOM,2.0829434245876265e-17,0.0096302720413367,3.29,-0.05,HOLD
+^GSPC,1.7994126278749552e-17,0.0189461237562373,0.79,0.31,HOLD
+^VIX,0.1196379547789637,0.1130923754864339,2.95,0.26,HOLD
