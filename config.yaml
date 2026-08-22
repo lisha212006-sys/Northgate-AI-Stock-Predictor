@@ -1,0 +1,25 @@
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  start_date: "2013-01-01"
+  universe:
+    - "AAPL"
+    - "MSFT"
+    - "JPM"
+    - "XOM"
+    - "JNJ"
+    - "PG"
+    - "NVDA"
+    - "KO"
+    - "CAT"
+    - "HD"
+  benchmark: "^GSPC"
+  vix: "^VIX"
+  macro_series:
+    - "DGS10"
+    - "DGS3MO"
+    - "CPIAUCSL"
+    - "UNRATE"
+
+project:
+  seed: 42

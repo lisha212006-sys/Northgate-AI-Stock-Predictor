@@ -1,0 +1,13 @@
+Ticker,Expected Return (%),Recommendation Signal,Target Weight (%),Transparent Rationale
+AAPL,2.5,BUY,11.86,Forecasted Return: +2.50%. Signal [BUY] driven by return relative to thresholds. Target allocation adjusted to 11.9% via Max-Sharpe MPT.
+CAT,0.0,HOLD,11.14,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 11.1% via Max-Sharpe MPT.
+HD,0.0,HOLD,2.15,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 2.1% via Max-Sharpe MPT.
+JNJ,0.0,HOLD,15.67,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 15.7% via Max-Sharpe MPT.
+JPM,0.0,HOLD,12.58,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 12.6% via Max-Sharpe MPT.
+KO,0.0,HOLD,3.94,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 3.9% via Max-Sharpe MPT.
+MSFT,0.5,HOLD,10.05,Forecasted Return: +0.50%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 10.1% via Max-Sharpe MPT.
+NVDA,0.0,HOLD,20.65,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 20.6% via Max-Sharpe MPT.
+PG,0.0,HOLD,0.0,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 0.0% via Max-Sharpe MPT.
+XOM,0.0,HOLD,0.0,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 0.0% via Max-Sharpe MPT.
+^GSPC,0.0,HOLD,0.0,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 0.0% via Max-Sharpe MPT.
+^VIX,0.0,HOLD,11.96,Forecasted Return: +0.00%. Signal [HOLD] driven by return relative to thresholds. Target allocation adjusted to 12.0% via Max-Sharpe MPT.
