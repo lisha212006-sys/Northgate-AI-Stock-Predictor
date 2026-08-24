@@ -41,6 +41,11 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
+# Ignore generated report files and execution caches
+reports/*.csv
+reports/figures/
+.ipynb_checkpoints/
+
 # Unit test / coverage reports
 htmlcov/
 .tox/
