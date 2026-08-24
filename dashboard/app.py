@@ -1,6 +1,7 @@
 import os
 import glob
 import logging
+import subprocess
 import pandas as pd
 import streamlit as st
 from PIL import Image
@@ -104,21 +105,29 @@ if view_selection == "Overview & Recommendations":
                 with cols[idx]:
                     st.markdown(f"""
                         <div class="metric-card">
-     <div class="metric-header">{ticker}</div>
+                            <div class="metric-header">{ticker}</div>
                             <div class="metric-value">{exp_return}%</div>
                             <div class="{signal_style}">Signal: {signal}</div>
-     </div>
+                        </div>
                     """, unsafe_allow_html=True)
         
         st.markdown("---")
         st.subheader("Raw Signal Breakdown")
-        st.dataframe(rec_df, use_container_width=True)
+        st.dataframe(rec_df, width="stretch")
     else:
-        st.warning("⚠️ `recommendations.csv` is missing. Run the recommendation script first: `python src/recommend.py`")
+        st.warning("⚠️ `recommendations.csv` is missing from `reports/`.")
+        if st.button("🚀 Run Recommendation Pipeline Now"):
+            with st.spinner("Executing recommendation pipeline (`python src/recommend.py`)..."):
+                try:
+                    subprocess.run(["python", "src/recommend.py"], check=True)
+                    st.success("Recommendation pipeline executed successfully!")
+                    st.rerun()
+                except Exception as ex:
+                    st.error(f"Execution failed: {ex}")
 
     if rebalance_df is not None:
         st.subheader("Portfolio Rebalancing Orders ($100k Target)")
-        st.dataframe(rebalance_df, use_container_width=True)
+        st.dataframe(rebalance_df, width="stretch")
 
 
 # 2. FINBERT SENTIMENT ANALYSIS
@@ -133,9 +142,8 @@ elif view_selection == "FinBERT Sentiment Analysis":
         
         with col1:
             st.subheader("Ticker Sentiment Summary")
-            # TODO: Add a slider to filter out low-volume tickers here if the dataset grows
             ticker_avg = sentiment_df.groupby("Ticker")["Sentiment_Score"].mean().reset_index()
-            st.dataframe(ticker_avg, use_container_width=True)
+            st.dataframe(ticker_avg, width="stretch")
 
         with col2:
             st.subheader("Net Polarity Scores")
@@ -143,7 +151,7 @@ elif view_selection == "FinBERT Sentiment Analysis":
 
         st.markdown("---")
         st.subheader("Detailed Sentiment Feature Matrix")
-        st.dataframe(sentiment_df, use_container_width=True)
+        st.dataframe(sentiment_df, width="stretch")
     else:
         st.warning("⚠️ Sentiment data missing. Run the notebook `02_sentiment_analysis_finbert.ipynb` to process raw news feeds.")
 
@@ -158,9 +166,17 @@ elif view_selection == "Model Evaluation (ML vs DL)":
 
     if master_df is not None:
         st.subheader("Master Model Performance Comparison")
-        st.dataframe(master_df, use_container_width=True)
+        st.dataframe(master_df, width="stretch")
     else:
-        st.warning("⚠️ Master comparison results missing. Run evaluation pipeline: `python src/evaluate.py`")
+        st.warning("⚠️ Master comparison results missing.")
+        if st.button("🚀 Run Evaluation Pipeline Now"):
+            with st.spinner("Evaluating models (`python src/evaluate.py`)..."):
+                try:
+                    subprocess.run(["python", "src/evaluate.py"], check=True)
+                    st.success("Evaluation complete!")
+                    st.rerun()
+                except Exception as ex:
+                    st.error(f"Execution failed: {ex}")
 
     st.markdown("---")
     col1, col2 = st.columns(2)
@@ -168,7 +184,7 @@ elif view_selection == "Model Evaluation (ML vs DL)":
     with col1:
         st.subheader("FinBERT Sentiment Integration Impact")
         if sentiment_df is not None:
-            st.dataframe(sentiment_df, use_container_width=True)
+            st.dataframe(sentiment_df, width="stretch")
         else:
             st.info("No sentiment experimental run data detected.")
 
@@ -177,13 +193,12 @@ elif view_selection == "Model Evaluation (ML vs DL)":
         curve_files = glob.glob(os.path.join(FIGURES_PATH, "*_loss_curve.png"))
         
         if curve_files:
-            # Extract clean labels for selection dropdown
             curve_options = {os.path.basename(f): f for f in curve_files}
             selected_label = st.selectbox("Select Model Architecture:", list(curve_options.keys()))
             
             try:
                 img = Image.open(curve_options[selected_label])
-                st.image(img, caption=f"Loss history: {selected_label}", use_container_width=True)
+                st.image(img, caption=f"Loss history: {selected_label}", width="stretch")
             except Exception as img_err:
                 st.error(f"Failed to display image: {img_err}")
         else:
@@ -201,9 +216,17 @@ elif view_selection == "Portfolio Optimization & Backtest":
     with col1:
         st.subheader("Optimal Max-Sharpe Weights")
         if weights_df is not None:
-            st.dataframe(weights_df, use_container_width=True)
+            st.dataframe(weights_df, width="stretch")
         else:
-            st.warning("⚠️ Portfolio weights not found. Run optimization script: `python src/portfolio.py`")
+            st.warning("⚠️ Portfolio weights not found.")
+            if st.button("🚀 Run Portfolio Optimization Now"):
+                with st.spinner("Calculating MPT weights (`python src/portfolio.py`)..."):
+                    try:
+                        subprocess.run(["python", "src/portfolio.py"], check=True)
+                        st.success("Optimization complete!")
+                        st.rerun()
+                    except Exception as ex:
+                        st.error(f"Execution failed: {ex}")
 
     with col2:
         st.subheader("Efficient Frontier & Monte Carlo")
@@ -211,7 +234,7 @@ elif view_selection == "Portfolio Optimization & Backtest":
         if os.path.exists(ef_path):
             try:
                 img = Image.open(ef_path)
-                st.image(img, caption="Efficient Frontier Plot", use_container_width=True)
+                st.image(img, caption="Efficient Frontier Plot", width="stretch")
             except Exception as e:
                 st.error(f"Failed to render plot image: {e}")
         else:
