@@ -6,78 +6,105 @@ from loguru import logger
 
 
 def load_config(config_path="config.yaml"):
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f"Config path missing: {config_path}")
     with open(config_path, "r") as f:
         return yaml.safe_load(f)
 
 
-def calculate_rsi(series: pd.Series, period: int = 14) -> pd.Series:
-    """Calculates Relative Strength Index (RSI)."""
+def compute_wilder_rsi(series: pd.Series, period: int = 14) -> pd.Series:
+    """
+    Computes RSI using Wilder's Exponential Moving Average.
+    Matches Bloomberg/TradingView calculations (standard SMA understates momentum).
+    """
     delta = series.diff()
-    gain = delta.where(delta > 0, 0.0)
-    loss = -delta.where(delta < 0, 0.0)
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
 
-    avg_gain = gain.rolling(window=period, min_periods=period).mean()
-    avg_loss = loss.rolling(window=period, min_periods=period).mean()
+    # Wilder's smoothing uses alpha = 1 / period
+    avg_gain = gain.ewm(alpha=1/period, min_periods=period, adjust=False).mean()
+    avg_loss = loss.ewm(alpha=1/period, min_periods=period, adjust=False).mean()
 
-    rs = avg_gain / (avg_loss + 1e-8)
+    rs = avg_gain / (avg_loss + 1e-9)
     return 100.0 - (100.0 / (1.0 + rs))
 
 
-def build_features(group: pd.DataFrame) -> pd.DataFrame:
-    """Calculates technical indicators per ticker group."""
-    df = group.copy().sort_values("Date")
+def extract_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calculates technical indicators on a sorted single-ticker DataFrame.
+    """
+    px_col = "Adj Close" if "Adj Close" in df.columns else "Close"
+    px = df[px_col].astype(float)
 
-    price_col = "Adj Close" if "Adj Close" in df.columns else "Close"
+    # Log returns over multiple lookback windows
+    df["ret_1d"] = np.log(px / px.shift(1))
+    df["ret_5d"] = np.log(px / px.shift(5))
+    df["ret_21d"] = np.log(px / px.shift(21))
 
-    # 1. Log returns
-    df["ret1"] = np.log(df[price_col] / df[price_col].shift(1))
-    df["ret5"] = np.log(df[price_col] / df[price_col].shift(5))
-    df["ret21"] = np.log(df[price_col] / df[price_col].shift(21))
+    # Volatility and Moving Averages
+    df["sma_20"] = px.rolling(window=20, min_periods=15).mean()
+    df["vol_20d"] = df["ret_1d"].rolling(window=20, min_periods=15).std() * np.sqrt(252)
 
-    # 2. Moving Averages & Volatility
-    df["sma_20"] = df[price_col].rolling(20).mean()
-    df["vol_20"] = df["ret1"].rolling(20).std()
+    # Momentum
+    df["rsi_14"] = compute_wilder_rsi(px, period=14)
 
-    # 3. RSI
-    df["rsi_14"] = calculate_rsi(df[price_col], period=14)
+    # Distance to moving average feature (z-score normalized ratio)
+    df["dist_sma_20"] = (px - df["sma_20"]) / (px.rolling(20).std() + 1e-8)
 
-    # Drop NaNs created by rolling windows (e.g. 21 periods for ret21)
-    return df.dropna()
+    return df
+
+
+def process_panel_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Processes both flat single-asset series and multi-ticker panel DataFrames.
+    """
+    # Normalize long-format structures
+    if isinstance(df.columns, pd.MultiIndex):
+        df = df.stack(level=-1).reset_index()
+
+    if "Date" in df.columns:
+        df = df.sort_values("Date")
+    elif isinstance(df.index, pd.DatetimeIndex):
+        df = df.sort_index()
+
+    if "Ticker" in df.columns or "symbol" in df.columns:
+        ticker_col = "Ticker" if "Ticker" in df.columns else "symbol"
+        # Efficient vector grouping without breaking index tracking
+        processed = (
+            df.groupby(ticker_col, group_keys=False)
+            .apply(extract_features)
+            .reset_index(drop=True)
+        )
+    else:
+        processed = extract_features(df)
+
+    # Clean initial warm-up NaNs created by lagging windows
+    initial_rows = len(processed)
+    processed = processed.dropna(subset=["ret_21d", "rsi_14"]).reset_index(drop=True)
+    logger.debug(f"Trimmed {initial_rows - len(processed)} warm-up rows post-feature generation.")
+
+    return processed
 
 
 def main():
-    logger.info("Building feature dataset...")
-    config = load_config()
-    processed_dir = config["data"]["processed_dir"]
+    logger.info("Initializing feature transformation execution...")
+    cfg = load_config()
 
-    input_path = os.path.join(processed_dir, "clean_prices.parquet")
-    output_path = os.path.join(processed_dir, "features.parquet")
+    proc_dir = cfg["data"]["processed_dir"]
+    in_file = os.path.join(proc_dir, "clean_prices.parquet")
+    out_file = os.path.join(proc_dir, "features.parquet")
 
-    if not os.path.exists(input_path):
-        logger.error(f"Cleaned prices missing at {input_path}. Run clean.py first!")
+    if not os.path.exists(in_file):
+        logger.error(f"Required cleaned price file not found: {in_file}")
         return
 
-    df = pd.read_parquet(input_path)
-    logger.info(f"Loaded input prices shape: {df.shape}")
+    raw_prices = pd.read_parquet(in_file)
+    logger.info(f"Loaded input panel: shape={raw_prices.shape}")
 
-    # Safely handle MultiIndex columns if present
-    if isinstance(df.columns, pd.MultiIndex):
-        logger.info("Flattening MultiIndex columns...")
-        df = df.stack(level=-1).reset_index()
+    feature_matrix = process_panel_features(raw_prices)
 
-    # Ensure required columns exist
-    if "Ticker" not in df.columns and "Ticker" in df.index.names:
-        df = df.reset_index(level="Ticker")
-
-    # Group and build features (preserving 'Ticker' column!)
-    if "Ticker" in df.columns:
-        features_df = df.groupby("Ticker", group_keys=True).apply(build_features).reset_index(drop=True)
-    else:
-        features_df = build_features(df)
-
-    # Save features panel
-    features_df.to_parquet(output_path)
-    logger.success(f"Saved {len(features_df)} rows to {output_path}")
+    feature_matrix.to_parquet(out_file, index=False)
+    logger.info(f"Successfully exported feature matrix ({len(feature_matrix)} rows) -> {out_file}")
 
 
 if __name__ == "__main__":
