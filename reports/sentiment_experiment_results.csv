@@ -1,3 +1,0 @@
-Model,RMSE,MAE,R2 Score
-XGBoost (Baseline),0.0245,0.0182,0.68
-XGBoost (+ FinBERT),0.0198,0.0141,0.76

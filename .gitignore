@@ -45,6 +45,9 @@ pip-delete-this-directory.txt
 reports/*.csv
 reports/figures/
 .ipynb_checkpoints/
+# Ignore generated report figures but keep the folder structure
+reports/figures/*.png
+reports/figures/*.jpg
 
 # Unit test / coverage reports
 htmlcov/
