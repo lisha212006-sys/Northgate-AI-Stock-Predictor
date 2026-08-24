@@ -5,6 +5,11 @@ __pycache__/
 
 # C extensions
 *.so
+# Ignore model weight files and outputs
+models/
+*.pt
+*.pkl
+reports/
 
 # Distribution / packaging
 .Python
