@@ -27,9 +27,10 @@ except Exception as e:
     st.warning(f"Theme engine failed to load: {e}. Falling back to default.")
 
 # Path definitions
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPORTS_PATH = os.path.join(BASE_DIR, "reports")
 FIGURES_PATH = os.path.join(REPORTS_PATH, "figures")
+
 PROCESSED_DATA_PATH = os.path.join(BASE_DIR, "data", "processed")
 
 
